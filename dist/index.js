@@ -5419,6 +5419,11 @@ const execute = async (context) => {
     prBody: core.getInput("pr_body"),
   };
 
+  let prBody = context.payload.pull_request.body;
+  if (prBody == undefined || prBody == null) {
+    prBody = "";
+  }
+
   const octokit = new Octokit({ auth: inputs.githubToken });
 
   const { data } = await octokit.rest.pulls.listCommits({
