@@ -3,7 +3,7 @@ description: 'GitHub Action that generates a prerelease changelog'
 author: 'uman.ai'
 runs:
   using: 'node12'
-  main: 'index.js'
+  main: 'dist/index.js'
 inputs:
   github_token:
     description: 'The GITHUB_TOKEN secret'
