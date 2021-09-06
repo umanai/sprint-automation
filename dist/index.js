@@ -5403,8 +5403,8 @@ const getRegEx = (text) =>
 const updateBody = (body, template) => {
   const parsedSection = updateSection.parse(
     body.split("\n"),
-    getRegEx("<!-- START prerelease-changelog "),
-    getRegEx("<!-- END prerelease-changelog ")
+    (line) => getRegEx("<!-- START prerelease-changelog ").test(line),
+    (line) => getRegEx("<!-- END prerelease-changelog ").test(line)
   );
   if (!parsedSection.hasStart) {
     return `${body}\n${START_LINE}\n${template}\n${END_LINE}`;
