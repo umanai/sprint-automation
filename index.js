@@ -19,7 +19,12 @@ const updateBody = (body, template) => {
     return `${body}\n${START_LINE}\n${template}\n${END_LINE}`;
   }
 
-  return updateSection(body, `${START_LINE}\n${template}\n${END_LINE}`);
+  return updateSection(
+    body,
+    `${START_LINE}\n${template}\n${END_LINE}`,
+    (line) => getRegEx("<!-- START prerelease-changelog ").test(line),
+    (line) => getRegEx("<!-- END prerelease-changelog ").test(line)
+  );
 };
 
 const execute = async (context) => {
