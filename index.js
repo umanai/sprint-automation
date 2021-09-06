@@ -43,10 +43,12 @@ const execute = async (context) => {
   const changelog = data
     .filter((commit) => /^Merge pull request #\d+/.test(commit.commit.message))
     .map((commit) => {
+      const splitMessage = commit.commit.message.split("\n");
+      const message = splitMessage[splitMessage.length - 1];
       if (commit.author == undefined || commit.author == null) {
-        return `* ${commit.commit.message}`;
+        return `* ${message}`;
       }
-      return `* ${commit.commit.message} @${commit.author.login}`;
+      return `* ${message} @${commit.author.login}`;
     })
     .join("\n");
 
