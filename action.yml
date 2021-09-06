@@ -1,0 +1,14 @@
+name: 'Prerelease Changelog'
+description: 'GitHub Action that generates a prerelease changelog'
+author: 'uman.ai'
+runs:
+  using: 'node12'
+  main: 'index.js'
+inputs:
+  github_token:
+    description: 'The GITHUB_TOKEN secret'
+    required: true
+
+branding:
+  icon: git-pull-request
+  color: green

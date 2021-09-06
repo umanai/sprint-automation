@@ -1,0 +1,25 @@
+{
+  "name": "github-prerelease-changelog-action",
+  "version": "1.0.0",
+  "description": "Updates the pull request with the prerelease changelog",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umanai/github-prerelease-changelog-action.git"
+  },
+  "author": "uman.ai",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/umanai/github-prerelease-changelog-action/issues"
+  },
+  "homepage": "https://github.com/umanai/github-prerelease-changelog-action#readme",
+  "dependencies": {
+    "@actions/core": "^1.5.0",
+    "@actions/github": "^5.0.0",
+    "@octokit/rest": "^18.10.0",
+    "update-section": "^0.3.3"
+  }
+}
