@@ -1341,7 +1341,7 @@ exports.withCustomRequest = withCustomRequest;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-const VERSION = "2.16.0";
+const VERSION = "2.16.2";
 
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
@@ -5430,25 +5430,23 @@ const execute = async (context) => {
   }
 
   const octokit = new Octokit({ auth: inputs.githubToken });
+  const allCommits = [];
 
-  const response = await octokit.rest.pulls.listCommits({
+  const params = {
     ...context.repo,
     pull_number: context.payload.number,
     per_page: 50
-  });
-  const nextLink = response.headers.link;
-  console.log(nextLink);
+  };
+  for await (const response of octokit.paginate.iterator(
+    octokit.rest.pulls.listCommits,
+    params
+  )) {
+    const commits = response.data;
+    commits.forEach((commit) => allCommits.push(commit));
+  }
 
-
-  console.log(reponse)
-
-  const changelog = data
-    .map((commit) => {
-      console.log("=============");
-      console.log(commit);
-    })
+  const changelog = allCommits
     .filter((commit) => /^Merge pull request #\d+/.test(commit.commit.message))
-    .map((commit) => console.log(commit.commit))
     .map((commit) => {
       const splitMessage = commit.commit.message.split("\n");
       const message = splitMessage[splitMessage.length - 1];
