@@ -5431,13 +5431,24 @@ const execute = async (context) => {
 
   const octokit = new Octokit({ auth: inputs.githubToken });
 
-  const { data } = await octokit.rest.pulls.listCommits({
+  const response = await octokit.rest.pulls.listCommits({
     ...context.repo,
     pull_number: context.payload.number,
+    per_page: 50
   });
+  const nextLink = response.headers.link;
+  console.log(nextLink);
+
+
+  console.log(reponse)
 
   const changelog = data
+    .map((commit) => {
+      console.log("=============");
+      console.log(commit);
+    })
     .filter((commit) => /^Merge pull request #\d+/.test(commit.commit.message))
+    .map((commit) => console.log(commit.commit))
     .map((commit) => {
       const splitMessage = commit.commit.message.split("\n");
       const message = splitMessage[splitMessage.length - 1];
