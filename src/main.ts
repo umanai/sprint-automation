@@ -1,3 +1,6 @@
 import { run } from "./sprint-automation";
 
-run().catch((error) => console.error(error));
+run().catch((error) => {
+  console.error(error);
+  throw error;
+});

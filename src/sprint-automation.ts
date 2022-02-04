@@ -4,13 +4,10 @@ import * as github from "@actions/github";
 import { readyToStage } from "./ready-to-stage";
 
 export async function run(): Promise<void> {
-  const baseRef = github.context.payload.pull_request?.base.ref;
-  const headRef = github.context.payload.pull_request?.head.ref;
+  const ref = github.context.payload.ref;
 
-  const READY_TO_STAGE_CONDITION =
-    baseRef === "development" && headRef != "master";
-  const READY_TO_VALIDATE_CONDITION =
-    baseRef === "master" && headRef === "development";
+  const READY_TO_STAGE_CONDITION = ref === "refs/heads/development";
+  const READY_TO_VALIDATE_CONDITION = ref === "refs/heads/master";
 
   if (READY_TO_STAGE_CONDITION) {
     return readyToStage();

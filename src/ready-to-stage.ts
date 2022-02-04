@@ -7,14 +7,57 @@ import { Project } from "./util";
 const READY_TO_STAGE_FIELD = "Ready to Stage";
 
 export async function readyToStage(): Promise<void> {
-  const relatedIssues = await getRelatedIssues();
-  console.log(relatedIssues);
-
+  const lastPrId = await getLastPrId();
+  const relatedIssues = await getRelatedIssues(lastPrId);
   const project = await getProject();
-  console.log(project);
+
+  return updateProjectIssue(relatedIssues, project);
 }
 
-async function getRelatedIssues(): Promise<string[]> {
+async function getLastPrId(): Promise<string> {
+  const commitsResponse = await github
+    .getOctokit(core.getInput("github_token"))
+    .rest.repos.listCommits({
+      owner: "umanai",
+      repo: core.getInput("repo_name"),
+      sha: "development",
+      per_page: 100,
+    });
+
+  if (commitsResponse.data.length === 0) {
+    throw {
+      name: "ValueError",
+      message: "Development commits cannot be empty",
+    };
+  }
+
+  const lastCommit = commitsResponse.data[0];
+  if (lastCommit.sha != github.context.sha) {
+    throw {
+      name: "ValueError",
+      message: "Last commit not retrieved correctly.",
+    };
+  }
+  const pullNumberMatches = lastCommit.commit.message.match(/ #\d+ /gm);
+  if (pullNumberMatches === null || pullNumberMatches.length != 1) {
+    throw {
+      name: "ValueError",
+      message:
+        "Could not find correct amount of PR number matches for last commit.",
+    };
+  }
+  const pullNumber = pullNumberMatches[0].replace(/ /g, "").replace(/#/, "");
+  const prResponse = await github
+    .getOctokit(core.getInput("github_token"))
+    .rest.pulls.get({
+      owner: "umanai",
+      repo: core.getInput("repo_name"),
+      pull_number: parseInt(pullNumber),
+    });
+  return prResponse.data.node_id;
+}
+
+async function getRelatedIssues(pullRequestId: string): Promise<string[]> {
   const relatedIssuesQuery = `
         query ($pr_id: ID!) {
             node(id: $pr_id) {
@@ -37,7 +80,7 @@ async function getRelatedIssues(): Promise<string[]> {
   const response: any = await github
     .getOctokit(core.getInput("github_token"))
     .graphql(relatedIssuesQuery, {
-      pr_id: github.context.payload.pull_request?.node_id,
+      pr_id: pullRequestId,
     });
 
   return response.node.closingIssuesReferences.nodes
@@ -50,24 +93,25 @@ async function getRelatedIssues(): Promise<string[]> {
 async function getProjectIssueStatus(
   projectIssueFields: object[]
 ): Promise<{ fieldId: string; valueId: string }> {
-  console.log("2");
+  let result = null;
   projectIssueFields.forEach((field: any) => {
     if (field.name === "Status") {
       const settings = JSON.parse(field.settings);
       const statusOptions = settings.options;
       let valueId = "";
-      console.log("3");
       statusOptions.forEach((option: any) => {
         if (option.name === READY_TO_STAGE_FIELD) valueId = option.id;
       });
-      return { fieldId: field.id, valueId };
+      result = { fieldId: field.id, valueId };
     }
   });
-  console.log("4");
-  throw {
-    name: "NotFoundError",
-    message: "Status property not found in project fields.",
-  };
+  if (result === null) {
+    throw {
+      name: "NotFoundError",
+      message: "Status property not found in project fields.",
+    };
+  }
+  return result;
 }
 
 async function getProject(): Promise<Project> {
@@ -92,17 +136,13 @@ async function getProject(): Promise<Project> {
       organization: "umanai",
       project_number: 1,
     });
-  console.log("1");
+
   return {
     id: response.organization.projectNext.id,
     statusField: await getProjectIssueStatus(
       response.organization.projectNext.fields.nodes
     ),
   } as Project;
-
-  //   echo 'PROJECT_ID='$(jq '.data.organization.projectNext.id' project_data.json) >> $GITHUB_ENV
-  //   echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
-  //   echo 'IN_PROGRESS_OPTION_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Status") |.settings | fromjson.options[] | select(.name=="In Progress") |.id' project_data.json) >> $GITHUB_ENV
 }
 
 async function updateProjectIssue(
@@ -123,7 +163,7 @@ async function updateProjectIssue(
             }
         }`;
 
-  issueIds.forEach((issue) =>
+  return issueIds.forEach((issue) =>
     github
       .getOctokit(core.getInput("github_token"))
       .graphql(projectIssueMutation, {
