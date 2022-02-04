@@ -1,10 +1,13 @@
-# Github Prerelease Changelog Action
+# Sprint automation
 
 # Install
-*npm install*
+
+_npm install_
 
 # Build
-*ncc build index.js*
+
+_ncc build index.js_
 
 # Deploy
+
 Commit and push the dist/ folder to the repo.

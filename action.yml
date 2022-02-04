@@ -1,14 +1,13 @@
-name: 'Prerelease Changelog'
-description: 'GitHub Action that generates a prerelease changelog'
-author: 'uman.ai'
+name: "Sprint automation"
+description: "GitHub Action that updates the sprint planning according to staged pull requests"
+author: "uman"
 runs:
-  using: 'node12'
-  main: 'dist/index.js'
+  using: "node16"
+  main: "dist/index.js"
 inputs:
   github_token:
-    description: 'The GITHUB_TOKEN secret'
+    description: "The GITHUB_TOKEN secret"
     required: true
-
 branding:
   icon: git-pull-request
   color: green
