@@ -8,8 +8,6 @@ export async function getPr(number: number): Promise<any> {
     pull_number: number,
   });
 
-  console.log("==============");
-  console.log(response);
   return response.data;
 }
 
@@ -71,4 +69,17 @@ export async function getLastPr(
   }
 
   return { ...pullRequestData, commits: pullRequestCommits };
+}
+
+export async function getRelatedPullRequests(commits: any[]): Promise<any[]> {
+  const pulls: any[] = [];
+  commits
+    .filter((commit) => /^Merge pull request #\d+ /.test(commit.commit.message))
+    .forEach((commit) => {
+      const pullNumberMatches = commit.commit.message.match(/#\d+ /gm);
+      const pullNumber = pullNumberMatches[0].split(" ")[0].replace(/#/, "");
+      pulls.push(getPr(parseInt(pullNumber)));
+    });
+
+  return Promise.all(pulls);
 }
