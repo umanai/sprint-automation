@@ -1,14 +1,24 @@
 import * as github from "@actions/github";
-import * as core from "@actions/core";
+import { getTransport } from "./util";
+
+export async function getPr(number: number): Promise<any> {
+  const response = await getTransport().rest.pulls.get({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    pull_number: number,
+  });
+
+  console.log("==============");
+  console.log(response);
+  return response.data;
+}
 
 export async function getLastPr(
   branch: string,
   messageRegex: RegExp,
-  withCommits: boolean = true
+  withCommits: boolean = false
 ): Promise<any> {
-  const octokit = github.getOctokit(core.getInput("github_token"));
-
-  const commitsResponse = await octokit.rest.repos.listCommits({
+  const commitsResponse = await getTransport().rest.repos.listCommits({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     sha: branch,
@@ -39,23 +49,26 @@ export async function getLastPr(
     };
   }
 
-  const pullNumber = pullNumberMatches[0]
-    .split(" ")[0]
-    .replace(/ /g, "")
-    .replace(/#/, "");
+  const pullNumber = pullNumberMatches[0].split(" ")[0].replace(/#/, "");
 
   const pullRequestParams = {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     pull_number: parseInt(pullNumber),
   };
-  const pullRequest = await octokit.rest.pulls.get(pullRequestParams);
+  const pullRequest = await getTransport().rest.pulls.get(pullRequestParams);
   const pullRequestData = pullRequest.data;
 
   if (!withCommits) return pullRequestData;
 
-  const pullRequestCommits = await octokit.rest.pulls.listCommits(
+  const pullRequestCommits: any[] = [];
+  for await (const response of getTransport().paginate.iterator(
+    getTransport().rest.pulls.listCommits,
     pullRequestParams
-  );
-  return { ...pullRequestData, commits: pullRequestCommits.data };
+  )) {
+    const commitData = response.data;
+    commitData.forEach((c: any) => pullRequestCommits.push(c));
+  }
+
+  return { ...pullRequestData, commits: pullRequestCommits };
 }
