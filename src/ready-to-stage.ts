@@ -3,58 +3,17 @@
 import * as github from "@actions/github";
 import * as core from "@actions/core";
 import { Project } from "./util";
+import { getLastPr } from "./shared";
 
 const READY_TO_STAGE_FIELD = "Ready to Stage";
 
 export async function readyToStage(): Promise<void> {
-  const lastPrId = await getLastPrId();
+  const lastPr = await getLastPr("development", / #\d+ /gm);
+  const lastPrId = lastPr.node_id;
   const relatedIssues = await getRelatedIssues(lastPrId);
   const project = await getProject();
 
   return updateProjectIssue(relatedIssues, project);
-}
-
-async function getLastPrId(): Promise<string> {
-  const commitsResponse = await github
-    .getOctokit(core.getInput("github_token"))
-    .rest.repos.listCommits({
-      owner: "umanai",
-      repo: core.getInput("repo_name"),
-      sha: "development",
-      per_page: 100,
-    });
-
-  if (commitsResponse.data.length === 0) {
-    throw {
-      name: "ValueError",
-      message: "Development commits cannot be empty",
-    };
-  }
-
-  const lastCommit = commitsResponse.data[0];
-  if (lastCommit.sha != github.context.sha) {
-    throw {
-      name: "ValueError",
-      message: "Last commit not retrieved correctly.",
-    };
-  }
-  const pullNumberMatches = lastCommit.commit.message.match(/ #\d+ /gm);
-  if (pullNumberMatches === null || pullNumberMatches.length != 1) {
-    throw {
-      name: "ValueError",
-      message:
-        "Could not find correct amount of PR number matches for last commit.",
-    };
-  }
-  const pullNumber = pullNumberMatches[0].replace(/ /g, "").replace(/#/, "");
-  const prResponse = await github
-    .getOctokit(core.getInput("github_token"))
-    .rest.pulls.get({
-      owner: "umanai",
-      repo: core.getInput("repo_name"),
-      pull_number: parseInt(pullNumber),
-    });
-  return prResponse.data.node_id;
 }
 
 async function getRelatedIssues(pullRequestId: string): Promise<string[]> {

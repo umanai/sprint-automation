@@ -2,6 +2,7 @@
 
 import * as github from "@actions/github";
 import { readyToStage } from "./ready-to-stage";
+import { readyToValidate } from "./ready-to-validate";
 
 export async function run(): Promise<void> {
   const ref = github.context.payload.ref;
@@ -14,10 +15,7 @@ export async function run(): Promise<void> {
   }
 
   if (READY_TO_VALIDATE_CONDITION) {
-    throw {
-      name: "NotImplementedError",
-      message: "readyToValidate does not exist.",
-    };
+    return readyToValidate();
   }
 
   console.error("Did not reach any conditions, exiting...");
