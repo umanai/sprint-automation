@@ -1,0 +1,17 @@
+name: Push@master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  update-sprint-planning:
+    name: Update Sprint Planning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move issue to 'Ready to Validate'
+        uses: umanai/sprint-automation@master
+        with:
+          github_token: ${{ secrets.SPRINT_AUTOMATION_TOKEN }}
+          update_pr_commits: false

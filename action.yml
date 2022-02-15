@@ -8,6 +8,10 @@ inputs:
   github_token:
     description: "The GITHUB_TOKEN secret"
     required: true
+  update_pr_commits:
+    description: "Updates all project issues related to all the commits of a PR"
+    required: false
+    default: "false"
 branding:
   icon: git-pull-request
   color: green
