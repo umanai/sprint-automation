@@ -32,7 +32,7 @@ export async function run(): Promise<void> {
   return;
 }
 
-function prettyPrintObject(obj: any): string {
+function prettyObject(obj: any): string {
   return JSON.stringify(obj, null, 4);
 }
 
@@ -47,9 +47,7 @@ async function moveSingleIssue(
   const relatedIssues = await getRelatedIssues(lastPrId);
   console.log("Related issues: " + relatedIssues);
 
-  console.log("Getting project for field: " + status_field);
   const project = await getProject(status_field);
-  console.log("Project: " + prettyPrintObject(project));
 
   console.log("Updating project issues: " + relatedIssues);
   return updateProjectIssue(relatedIssues, project);
@@ -65,9 +63,11 @@ export async function moveMultipleIssues(
     true
   );
 
-  console.log("Getting related PRs for commits: " + lastPr.commits);
+  console.log(
+    "Getting related PRs for commits: " + prettyObject(lastPr.commits)
+  );
   const relatedPullRequests = await getRelatedPullRequests(lastPr.commits);
-  console.log("Related PRs: " + relatedPullRequests);
+  console.log("Related PRs: " + prettyObject(relatedPullRequests));
 
   relatedPullRequests.forEach(async (pr: any) => {
     const node_id = pr.node_id;
@@ -75,9 +75,7 @@ export async function moveMultipleIssues(
     const relatedIssues = await getRelatedIssues(node_id);
     console.log("Related issues: " + relatedIssues);
 
-    console.log("Getting project for field: " + status_field);
     const project = await getProject(status_field);
-    console.log("Project: " + prettyPrintObject(project));
 
     console.log("Updating project issues: " + relatedIssues);
     return updateProjectIssue(relatedIssues, project);
