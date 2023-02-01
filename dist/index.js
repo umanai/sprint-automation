@@ -8657,9 +8657,10 @@ function getProject(targetField) {
             organization: "umanai",
             project_number: 1,
         });
+        console.log(response);
         return {
-            id: response.organization.project.id,
-            statusField: yield getProjectIssueStatus(response.organization.project.fields.nodes, targetField),
+            id: response.organization.projectV2.id,
+            statusField: yield getProjectIssueStatus(response.organization.projectV2.fields.nodes, targetField),
         };
     });
 }

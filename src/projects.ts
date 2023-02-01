@@ -51,10 +51,12 @@ export async function getProject(targetField: string): Promise<Project> {
     project_number: 1,
   });
 
+  console.log(response);
+
   return {
-    id: response.organization.project.id,
+    id: response.organization.projectV2.id,
     statusField: await getProjectIssueStatus(
-      response.organization.project.fields.nodes,
+      response.organization.projectV2.fields.nodes,
       targetField
     ),
   } as Project;
