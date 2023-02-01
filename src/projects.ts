@@ -7,10 +7,9 @@ export async function getProjectIssueStatus(
   let result = null;
   projectIssueFields.forEach((field: any) => {
     if (field.name === "Status") {
-      const settings = JSON.parse(field.settings);
-      const statusOptions = settings.options;
+      const options = field.options;
       let valueId = "";
-      statusOptions.forEach((option: any) => {
+      options.forEach((option: any) => {
         if (option.name === targetField) valueId = option.id;
       });
       result = { fieldId: field.id, valueId };
@@ -29,13 +28,18 @@ export async function getProject(targetField: string): Promise<Project> {
   const projectQuery = `
     query($organization: String!, $project_number: Int!) {
         organization(login: $organization){
-            projectNext(number: $project_number) {
+            projectV2 (number: $project_number) {
                 id
-                fields(first:20) {
+                fields (first:20) {
                     nodes {
-                        id
-                        name
-                        settings
+                        ... on ProjectV2SingleSelectField {
+                            id
+                            name
+                            options {
+                                id
+                                name
+                            }
+                        }
                     }
                 }
             }
@@ -47,9 +51,9 @@ export async function getProject(targetField: string): Promise<Project> {
   });
 
   return {
-    id: response.organization.projectNext.id,
+    id: response.organization.projectV2.id,
     statusField: await getProjectIssueStatus(
-      response.organization.projectNext.fields.nodes,
+      response.organization.projectV2.fields.nodes,
       targetField
     ),
   } as Project;
@@ -61,13 +65,15 @@ export async function updateProjectIssue(
 ): Promise<void> {
   const projectIssueMutation = `
     mutation ($project_id: ID!, $item_id: ID!, $status_field_id: ID!, $status_value_id: String!) {
-        set_status: updateProjectNextItemField(input: {
+        updateProjectV2ItemFieldValue(input: {
             projectId: $project_id
             itemId: $item_id
             fieldId: $status_field_id
-            value: $status_value_id
+            value: {
+                singleSelectOptionId: $status_value_id
+            }
         }) {
-            projectNextItem {
+            projectV2Item {
                 id
             }
         }

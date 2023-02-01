@@ -32,15 +32,24 @@ export async function run(): Promise<void> {
   return;
 }
 
+function prettyObject(obj: any): string {
+  return JSON.stringify(obj, null, 4);
+}
+
 async function moveSingleIssue(
   branch: string = "development",
   status_field: string = READY_TO_STAGE_FIELD
 ): Promise<void> {
   const lastPr = await getLastPr(branch, /#\d+ /gm);
   const lastPrId = lastPr.node_id;
+
+  console.log("Getting related issues for PR: " + lastPrId);
   const relatedIssues = await getRelatedIssues(lastPrId);
+  console.log("Related issues: " + relatedIssues);
+
   const project = await getProject(status_field);
 
+  console.log("Updating project issues: " + relatedIssues);
   return updateProjectIssue(relatedIssues, project);
 }
 
@@ -54,13 +63,21 @@ export async function moveMultipleIssues(
     true
   );
 
+  console.log(
+    "Getting related PRs for commits: " + prettyObject(lastPr.commits)
+  );
   const relatedPullRequests = await getRelatedPullRequests(lastPr.commits);
+  console.log("Related PRs: " + prettyObject(relatedPullRequests));
 
   relatedPullRequests.forEach(async (pr: any) => {
     const node_id = pr.node_id;
+    console.log("Getting related issues for PR: " + node_id);
     const relatedIssues = await getRelatedIssues(node_id);
+    console.log("Related issues: " + relatedIssues);
+
     const project = await getProject(status_field);
 
+    console.log("Updating project issues: " + relatedIssues);
     return updateProjectIssue(relatedIssues, project);
   });
 }
