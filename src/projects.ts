@@ -52,9 +52,9 @@ export async function getProject(targetField: string): Promise<Project> {
   });
 
   return {
-    id: response.organization.projectNext.id,
+    id: response.organization.project.id,
     statusField: await getProjectIssueStatus(
-      response.organization.projectNext.fields.nodes,
+      response.organization.project.fields.nodes,
       targetField
     ),
   } as Project;

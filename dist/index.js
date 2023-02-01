@@ -8658,8 +8658,8 @@ function getProject(targetField) {
             project_number: 1,
         });
         return {
-            id: response.organization.projectNext.id,
-            statusField: yield getProjectIssueStatus(response.organization.projectNext.fields.nodes, targetField),
+            id: response.organization.project.id,
+            statusField: yield getProjectIssueStatus(response.organization.project.fields.nodes, targetField),
         };
     });
 }
