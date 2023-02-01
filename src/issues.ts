@@ -11,7 +11,7 @@ export async function getRelatedIssues(
                         closingIssuesReferences(first: 100) {
                             nodes {
                                 number
-                                projectNextItems(first: 100) {
+                                projectItems(first: 100) {
                                     nodes {
                                         title
                                         id

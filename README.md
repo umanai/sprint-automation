@@ -4,10 +4,6 @@
 
 _npm install_
 
-# Simulation
-
-You can use https://github.com/nektos/act to simulate the GitHub Actions locally.
-
 # Build
 
 _ncc build index.js_
