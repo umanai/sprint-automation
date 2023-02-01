@@ -8612,10 +8612,10 @@ function getProjectIssueStatus(projectIssueFields, targetField) {
         let result = null;
         projectIssueFields.forEach((field) => {
             if (field.name === "Status") {
-                const settings = JSON.parse(field.settings);
-                const statusOptions = settings.options;
+                console.log(field);
+                const options = field.options;
                 let valueId = "";
-                statusOptions.forEach((option) => {
+                options.forEach((option) => {
                     if (option.name === targetField)
                         valueId = option.id;
                 });
@@ -8636,13 +8636,18 @@ function getProject(targetField) {
         const projectQuery = `
     query($organization: String!, $project_number: Int!) {
         organization(login: $organization){
-            projectNext(number: $project_number) {
+            projectV2 (number: $project_number) {
                 id
-                fields(first:20) {
+                fields (first:20) {
                     nodes {
-                        id
-                        name
-                        settings
+                        ... on ProjectV2SingleSelectField {
+                            id
+                            name
+                            options {
+                                id
+                                name
+                            }
+                        }
                     }
                 }
             }
@@ -8662,13 +8667,13 @@ function updateProjectIssue(issueIds, project) {
     return projects_awaiter(this, void 0, void 0, function* () {
         const projectIssueMutation = `
     mutation ($project_id: ID!, $item_id: ID!, $status_field_id: ID!, $status_value_id: String!) {
-        set_status: updateProjectNextItemField(input: {
+        set_status: updateProjectItemField(input: {
             projectId: $project_id
             itemId: $item_id
             fieldId: $status_field_id
             value: $status_value_id
         }) {
-            projectNextItem {
+            projectItem {
                 id
             }
         }
