@@ -3,7 +3,7 @@ description: "GitHub Action that updates the sprint planning according to staged
 author: "uman"
 runs:
   using: "node16"
-  main: "dist/main/index.js"
+  main: "dist/index.js"
 inputs:
   github_token:
     description: "The GITHUB_TOKEN secret"
