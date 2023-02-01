@@ -13,7 +13,6 @@ export async function getRelatedIssues(
                                 number
                                 projectItems(first: 100) {
                                     nodes {
-                                        title
                                         id
                                     }
                                 }

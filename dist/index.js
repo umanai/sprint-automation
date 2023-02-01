@@ -8705,7 +8705,6 @@ function getRelatedIssues(pullRequestId) {
                                 number
                                 projectItems(first: 100) {
                                     nodes {
-                                        title
                                         id
                                     }
                                 }
@@ -8764,6 +8763,7 @@ function moveSingleIssue(branch = "development", status_field = READY_TO_STAGE_F
     return sprint_automation_awaiter(this, void 0, void 0, function* () {
         const lastPr = yield getLastPr(branch, /#\d+ /gm);
         const lastPrId = lastPr.node_id;
+        console.log("lastPrId", lastPrId);
         const relatedIssues = yield getRelatedIssues(lastPrId);
         const project = yield getProject(status_field);
         return updateProjectIssue(relatedIssues, project);
