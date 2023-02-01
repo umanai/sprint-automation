@@ -27,7 +27,7 @@ export async function getRelatedIssues(
 
   return response.node.closingIssuesReferences.nodes
     .map((node: any) =>
-      node.projectNextItems.nodes.map((itemNode: { id: string }) => itemNode.id)
+      node.projectItems.nodes.map((itemNode: { id: string }) => itemNode.id)
     )
     .flat();
 }

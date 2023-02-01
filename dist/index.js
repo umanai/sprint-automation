@@ -8717,7 +8717,7 @@ function getRelatedIssues(pullRequestId) {
             pr_id: pullRequestId,
         });
         return response.node.closingIssuesReferences.nodes
-            .map((node) => node.projectNextItems.nodes.map((itemNode) => itemNode.id))
+            .map((node) => node.projectItems.nodes.map((itemNode) => itemNode.id))
             .flat();
     });
 }
