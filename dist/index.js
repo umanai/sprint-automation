@@ -8765,23 +8765,38 @@ function run() {
         return;
     });
 }
+function prettyPrintObject(obj) {
+    console.log(JSON.stringify(obj, null, 4));
+}
 function moveSingleIssue(branch = "development", status_field = READY_TO_STAGE_FIELD) {
     return sprint_automation_awaiter(this, void 0, void 0, function* () {
         const lastPr = yield getLastPr(branch, /#\d+ /gm);
         const lastPrId = lastPr.node_id;
+        console.log("Getting related issues for PR: " + lastPrId);
         const relatedIssues = yield getRelatedIssues(lastPrId);
+        console.log("Related issues: " + relatedIssues);
+        console.log("Getting project for field: " + status_field);
         const project = yield getProject(status_field);
+        console.log("Project: " + prettyPrintObject(project));
+        console.log("Updating project issues: " + relatedIssues);
         return updateProjectIssue(relatedIssues, project);
     });
 }
 function moveMultipleIssues(branch = "master", status_field = READY_TO_VALIDATE_FIELD) {
     return sprint_automation_awaiter(this, void 0, void 0, function* () {
         const lastPr = yield getLastPr(branch, /#\d+ from umanai\/development/gm, true);
+        console.log("Getting related PRs for commits: " + lastPr.commits);
         const relatedPullRequests = yield getRelatedPullRequests(lastPr.commits);
+        console.log("Related PRs: " + relatedPullRequests);
         relatedPullRequests.forEach((pr) => sprint_automation_awaiter(this, void 0, void 0, function* () {
             const node_id = pr.node_id;
+            console.log("Getting related issues for PR: " + node_id);
             const relatedIssues = yield getRelatedIssues(node_id);
+            console.log("Related issues: " + relatedIssues);
+            console.log("Getting project for field: " + status_field);
             const project = yield getProject(status_field);
+            console.log("Project: " + prettyPrintObject(project));
+            console.log("Updating project issues: " + relatedIssues);
             return updateProjectIssue(relatedIssues, project);
         }));
     });
