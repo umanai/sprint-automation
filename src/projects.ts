@@ -7,7 +7,6 @@ export async function getProjectIssueStatus(
   let result = null;
   projectIssueFields.forEach((field: any) => {
     if (field.name === "Status") {
-      console.log(field);
       const options = field.options;
       let valueId = "";
       options.forEach((option: any) => {
@@ -51,8 +50,6 @@ export async function getProject(targetField: string): Promise<Project> {
     project_number: 1,
   });
 
-  console.log(response);
-
   return {
     id: response.organization.projectV2.id,
     statusField: await getProjectIssueStatus(
@@ -68,13 +65,15 @@ export async function updateProjectIssue(
 ): Promise<void> {
   const projectIssueMutation = `
     mutation ($project_id: ID!, $item_id: ID!, $status_field_id: ID!, $status_value_id: String!) {
-        set_status: updateProjectItemField(input: {
+        updateProjectV2ItemFieldValue(input: {
             projectId: $project_id
             itemId: $item_id
             fieldId: $status_field_id
-            value: $status_value_id
+            value: {
+                singleSelectOptionId: $status_value_id
+            }
         }) {
-            projectItem {
+            projectV2Item {
                 id
             }
         }

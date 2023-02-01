@@ -8612,7 +8612,6 @@ function getProjectIssueStatus(projectIssueFields, targetField) {
         let result = null;
         projectIssueFields.forEach((field) => {
             if (field.name === "Status") {
-                console.log(field);
                 const options = field.options;
                 let valueId = "";
                 options.forEach((option) => {
@@ -8657,7 +8656,6 @@ function getProject(targetField) {
             organization: "umanai",
             project_number: 1,
         });
-        console.log(response);
         return {
             id: response.organization.projectV2.id,
             statusField: yield getProjectIssueStatus(response.organization.projectV2.fields.nodes, targetField),
@@ -8668,13 +8666,15 @@ function updateProjectIssue(issueIds, project) {
     return projects_awaiter(this, void 0, void 0, function* () {
         const projectIssueMutation = `
     mutation ($project_id: ID!, $item_id: ID!, $status_field_id: ID!, $status_value_id: String!) {
-        set_status: updateProjectItemField(input: {
+        updateProjectV2ItemFieldValue(input: {
             projectId: $project_id
             itemId: $item_id
             fieldId: $status_field_id
-            value: $status_value_id
+            value: {
+                singleSelectOptionId: $status_value_id
+            }
         }) {
-            projectItem {
+            projectV2Item {
                 id
             }
         }
@@ -8769,7 +8769,6 @@ function moveSingleIssue(branch = "development", status_field = READY_TO_STAGE_F
     return sprint_automation_awaiter(this, void 0, void 0, function* () {
         const lastPr = yield getLastPr(branch, /#\d+ /gm);
         const lastPrId = lastPr.node_id;
-        console.log("lastPrId", lastPrId);
         const relatedIssues = yield getRelatedIssues(lastPrId);
         const project = yield getProject(status_field);
         return updateProjectIssue(relatedIssues, project);

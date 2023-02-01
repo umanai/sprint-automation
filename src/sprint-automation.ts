@@ -38,7 +38,7 @@ async function moveSingleIssue(
 ): Promise<void> {
   const lastPr = await getLastPr(branch, /#\d+ /gm);
   const lastPrId = lastPr.node_id;
-  console.log("lastPrId", lastPrId);
+
   const relatedIssues = await getRelatedIssues(lastPrId);
   const project = await getProject(status_field);
 
